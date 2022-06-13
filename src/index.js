@@ -30,7 +30,6 @@ form.addEventListener("submit", function (event) {
 
   // rest the form
   // form.reset()
-  event.target.reset();
 
   // A delete function that will remove tasks from your list
 
@@ -44,10 +43,41 @@ form.addEventListener("submit", function (event) {
 
   // add event listener to button
 
-  btn.addEventListener("click", function (event) {
-    // console.log("clicked");
-    li.remove();
-    // event.target.parentElement.remove();
+  // persist new task to db with POST request
+  // create config object for fetch
+  let config = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      content: input.value,
+    }),
+  };
+
+  // POST fetch request
+  let id;
+  fetch("http://localhost:3000/tasks", config)
+    .then((res) => res.json())
+    .then((task) => (id = task.id));
+  event.target.reset();
+
+  // btn.addEventListener("click", function (event) {
+  //   // console.log("clicked");
+  //   li.remove();
+  //   // event.target.parentElement.remove();
+  //   // persist deletion of task with DELETE request
+  //   // create config object for fetch
+  //   let config = {
+  //     method: "DELETE",
+  //   };
+  //   // DELETE fetch request
+  //   console.log(id);
+  //   fetch(`http://localhost:3000/tasks/${id}`, config);
+  // });
+  btn.addEventListener("click", () => {
+    deleteTask(id);
   });
 });
 
@@ -77,3 +107,62 @@ deleteAll.addEventListener("click", function () {
     li.remove();
   });
 });
+
+// when page loads display all of the existing tasks
+// fetch all the tasks
+
+function deleteTask(id) {
+  event.target.parentElement.remove();
+  let config = {
+    method: "DELETE",
+  };
+  // DELETE fetch request
+  console.log(id);
+  fetch(`http://localhost:3000/tasks/${id}`, config);
+}
+const fetchTasks = () => {
+  fetch("http://localhost:3000/tasks")
+    .then((res) => res.json())
+    .then((tasks) => {
+      tasks.forEach((task) => {
+        let li = document.createElement("li");
+        li.innerText = task.content;
+        let list = document.querySelector("ul");
+        list.append(li);
+        let btn = document.createElement("button");
+        btn.innerText = "X";
+        li.appendChild(btn);
+        // btn.addEventListener("click", function (event) {
+        //   li.remove();
+        //   let config = {
+        //     method: "DELETE",
+        //   };
+        //   // DELETE fetch request
+        //   console.log(task.id);
+        //   fetch(`http://localhost:3000/tasks/${task.id}`, config);
+        // });
+        btn.addEventListener("click", () => {
+          deleteTask(task.id);
+        });
+      });
+    });
+};
+
+fetchTasks();
+
+// delete tasks from the DOM and the DB
+// remove li from the DOM
+// send delete request to db
+
+// when a user submits a new task it appears on the DOM and it POSTs to DB
+// select form
+// add event listener to form
+// select input
+// updating the DOM
+// create li
+// update li innertext
+// select ul
+// append li
+//updating the DB
+// create config object
+// POST request
